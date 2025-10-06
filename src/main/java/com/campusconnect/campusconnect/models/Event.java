@@ -62,5 +62,5 @@ public class Event {
 
     @ElementCollection
     @Column(name = "user_id")
-    private List<UUID> attendees = new ArrayList<>();
+    private List<UUID> attendees = new ArrayList<>(); //event_attendees table 
 }
