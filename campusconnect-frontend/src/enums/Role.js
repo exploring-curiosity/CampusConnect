@@ -1,0 +1,1 @@
+export default ["STUDENT", "FACULTY", "ALLUMNI"]
