@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.campusconnect.campusconnect.models.User;
 import com.campusconnect.campusconnect.repositories.UserRepository;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.AllArgsConstructor;
 
 @RestController
@@ -49,7 +50,11 @@ public class AuthController {
     }
 
     @GetMapping("/users")
-    public List<User> getUsers() {
-        return userRepository.findAll();
+    public ResponseEntity<List<User>> getUsers(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(null);
+        }
+        return ResponseEntity.ok(userRepository.findAll());
     } 
 }
