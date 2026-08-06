@@ -38,8 +38,8 @@ onMounted(() => {
             <div v-for="event in events" :key="event.id"
                 class="p-4 border rounded-lg shadow-sm bg-white">
                 <h3 class="text-lg font-semibold">{{ event.title }}</h3>
-                <p class="text-gray-600">{{ event.description }}</p>
-                <p class="text-sm text-gray-500">{{ event.date }} -- {{ event.location }}</p>
+                <p class="text-gray-600">{{ event.description || '' }}</p>
+                <p class="text-sm text-gray-500">{{ event.date || '' }} -- {{ event.location }}</p>
                 <span class="text-xs px-2 py-1 rounded bg-blue-100 text-blue-800 mt-2 inline-block"> 
                     {{ event.isPublic? "Public": "Private" }}</span>
             </div>
