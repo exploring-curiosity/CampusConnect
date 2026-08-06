@@ -37,3 +37,6 @@ build/
 
 ### Environment ###
 .env
+
+### Node.js ###
+package-lock.json
