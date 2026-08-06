@@ -23,7 +23,6 @@ async function login() {
         if(!res.ok) {
             throw new Error(data.error)
         }
-        localStorage.setItem("token", "dummmy-token")
         router.push("/dashboard")
     } catch (err) {
         alert(err)

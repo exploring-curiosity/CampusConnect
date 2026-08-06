@@ -8,14 +8,17 @@ import java.util.UUID;
 import com.campusconnect.campusconnect.enums.Department;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -33,6 +36,7 @@ public class Event {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
@@ -41,9 +45,11 @@ public class Event {
     @Column(nullable = false)
     private UUID organizerId;
     
+    @NotNull
     @Column(nullable = false)
     private LocalDateTime date;
     
+    @NotBlank
     @Column(nullable = false)
     private String location;
 
@@ -60,7 +66,10 @@ public class Event {
     private Boolean isClosed = false;
     private String closingNote = "";
 
-    @ElementCollection
-    @Column(name = "user_id")
-    private List<UUID> attendees = new ArrayList<>(); //event_attendees table 
+    @JoinTable(
+        name = "event_attendees",
+        joinColumns = @JoinColumn(name = "event_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private List<UUID> attendees = new ArrayList<>();
 }
