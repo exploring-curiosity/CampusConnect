@@ -31,6 +31,8 @@ async function register() {
         }
         console.log("Registered: ", data)
         router.push("/login")
+        Object.assign(user, {...User})
+        confirmPassword.value = ''
     } catch (err) {
         alert(err.message || err)
     }
