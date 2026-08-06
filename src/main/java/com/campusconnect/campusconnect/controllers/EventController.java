@@ -40,7 +40,7 @@ public class EventController {
 
     @GetMapping("/all") 
     public ResponseEntity<List<Event>> getAllEvents() {
-        return ResponseEntity.ok(eventRepository.findAll());
+        return ResponseEntity.ok(eventRepository.findByIsPublicTrueAndIsClosedFalse());
     }
 
     @PutMapping("/{id}")
