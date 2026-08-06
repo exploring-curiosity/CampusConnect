@@ -76,6 +76,9 @@ public class EventController {
         // event.closingNote = note
         return eventRepository.findById(id)
                 .map(e -> {
+                    if (e.getIsClosed()) {
+                        return ResponseEntity.badRequest().body("Event is already closed");
+                    }
                     e.setIsClosed(true);
                     e.setClosingNote(note);
                     return ResponseEntity.ok(eventService.saveEvent(e));
