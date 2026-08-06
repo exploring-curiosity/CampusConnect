@@ -118,6 +118,9 @@ public class EventController {
     public ResponseEntity<?> deleteRsvp(@PathVariable UUID eventId, @PathVariable UUID userId) {
         return eventRepository.findById(eventId)
                 .map(e ->{
+                    if(e.getIsClosed()) {
+                        return ResponseEntity.badRequest().body("Event is Closed");
+                    }
                     if(e.getAttendees().contains(userId)) {
                         e.getAttendees().remove(userId);
                         eventService.saveEvent(e);
