@@ -14,6 +14,9 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -31,12 +34,17 @@ public class User {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
     
+    @NotBlank(message = "Username must not be empty")
+    @Size(max = 50, message = "Username must be at most 50 characters")
     @Column(nullable = false, unique = true)
     private String username;
     
     @Column(nullable = false)
     private String password;
     
+    @NotBlank(message = "Email must not be empty")
+    @Email(message = "Email must be valid")
+    @Size(max = 100, message = "Email must be at most 100 characters")
     @Column(nullable = false, unique = true)
     private String email;
     
