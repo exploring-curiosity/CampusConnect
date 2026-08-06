@@ -11,4 +11,6 @@ import com.campusconnect.campusconnect.models.Event;
 @Repository
 public interface EventRepository extends JpaRepository<Event, UUID> {
     List<Event> findByIsPublicTrue();
+
+    List<Event> findByIsPublicTrueAndIsClosedFalse();
 }

@@ -28,7 +28,8 @@ public class EventService {
     }
 
     public List<Event> getAllEvents() {
-        return eventRepository.findAll();
+        // Closed and non-public events are not part of the public listing.
+        return eventRepository.findByIsPublicTrueAndIsClosedFalse();
     }
 
     public Event getEventById(UUID id) {
