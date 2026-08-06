@@ -14,7 +14,7 @@ async function loadEvents() {
             throw new Error("Failed to load events")
         }
         const data = await res.json()
-        events.value = data.map(e => ({...Event, ...e}))
+        events.value = data.map(e => ({...e}))
     } catch (err) {
         error.value = err.message
     }
