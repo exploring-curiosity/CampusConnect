@@ -30,4 +30,10 @@ public class EventService {
     public List<Event> getAllEvents() {
         return eventRepository.findAll();
     }
+
+    public Event getEventById(UUID id) {
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Event with ID " + id + " not found"));
+    }
 }
