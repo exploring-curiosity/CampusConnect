@@ -16,6 +16,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.campusconnect.campusconnect.models.Event;
 import com.campusconnect.campusconnect.repositories.EventRepository;
+import com.campusconnect.campusconnect.services.EventService;
+import com.campusconnect.campusconnect.services.ResourceNotFoundException;
+
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import lombok.AllArgsConstructor;
 
@@ -25,12 +29,16 @@ import lombok.AllArgsConstructor;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @GetMapping("/{id}") 
-    public ResponseEntity<?> getEventById(@PathVariable UUID id) {
-        return eventRepository.findById(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok) //ResponseEntity.ok(event)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Event> getEventById(@PathVariable UUID id) {
+        return ResponseEntity.ok(eventService.getEventById(id));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
     }
 
     @PostMapping("/create") 
