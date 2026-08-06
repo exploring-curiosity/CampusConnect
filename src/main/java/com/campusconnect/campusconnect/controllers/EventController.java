@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.campusconnect.campusconnect.models.Event;
 import com.campusconnect.campusconnect.repositories.EventRepository;
+import com.campusconnect.campusconnect.services.EventService;
 
 import lombok.AllArgsConstructor;
 
@@ -25,6 +26,7 @@ import lombok.AllArgsConstructor;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @GetMapping("/{id}") 
     public ResponseEntity<?> getEventById(@PathVariable UUID id) {
@@ -35,12 +37,12 @@ public class EventController {
 
     @PostMapping("/create") 
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        return ResponseEntity.ok(eventRepository.save(event));    
+        return ResponseEntity.ok(eventService.saveEvent(event));    
     }
 
     @GetMapping("/all") 
     public ResponseEntity<List<Event>> getAllEvents() {
-        return ResponseEntity.ok(eventRepository.findAll());
+        return ResponseEntity.ok(eventService.getAllEvents());
     }
 
     @PutMapping("/{id}")
@@ -48,7 +50,7 @@ public class EventController {
         return eventRepository.findById(id)
                 .map(e -> {
                     updatedEvent.setId(e.getId());
-                    return ResponseEntity.ok(eventRepository.save(updatedEvent));
+                    return ResponseEntity.ok(eventService.saveEvent(updatedEvent));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -56,7 +58,7 @@ public class EventController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable UUID id) {
         if(eventRepository.existsById(id)) {
-            eventRepository.deleteById(id);
+            eventService.deleteEvent(id);
             return ResponseEntity.ok("Event Deleted Successfully");
         }
         return ResponseEntity.notFound().build();
@@ -74,7 +76,7 @@ public class EventController {
                 .map(e -> {
                     e.setIsClosed(true);
                     e.setClosingNote(note);
-                    return ResponseEntity.ok(eventRepository.save(e));
+                    return ResponseEntity.ok(eventService.saveEvent(e));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -101,7 +103,7 @@ public class EventController {
                     }
 
                     e.getAttendees().add(userId);
-                    eventRepository.save(e);
+                    eventService.saveEvent(e);
                     return ResponseEntity.ok("RsVP Successfully");
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -113,7 +115,7 @@ public class EventController {
                 .map(e ->{
                     if(e.getAttendees().contains(userId)) {
                         e.getAttendees().remove(userId);
-                        eventRepository.save(e);
+                        eventService.saveEvent(e);
                         return ResponseEntity.ok("User removed RSVP");
                     } else {
                         return ResponseEntity.badRequest().body("User not RsVPed");
