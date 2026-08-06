@@ -13,6 +13,6 @@ defineEmits(["update:modelValue"])
         :placeholder="placeholder"
         :value="modelValue"
         @input="$emit('update:modelValue', $event.target.value)"
-        class = "w-full p-2 border rounder-md"
+        class = "w-full p-2 border rounded-md"
     />
 </template>

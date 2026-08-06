@@ -5,7 +5,9 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.dao.DataAccessException;
 import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,6 +18,10 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.campusconnect.campusconnect.models.Event;
 import com.campusconnect.campusconnect.repositories.EventRepository;
+import com.campusconnect.campusconnect.services.EventService;
+import com.campusconnect.campusconnect.services.ResourceNotFoundException;
+
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 import lombok.AllArgsConstructor;
 
@@ -25,22 +31,26 @@ import lombok.AllArgsConstructor;
 public class EventController {
 
     private final EventRepository eventRepository;
+    private final EventService eventService;
 
     @GetMapping("/{id}") 
-    public ResponseEntity<?> getEventById(@PathVariable UUID id) {
-        return eventRepository.findById(id)
-                .<ResponseEntity<?>>map(ResponseEntity::ok) //ResponseEntity.ok(event)
-                .orElse(ResponseEntity.notFound().build());
+    public ResponseEntity<Event> getEventById(@PathVariable UUID id) {
+        return ResponseEntity.ok(eventService.getEventById(id));
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFound(ResourceNotFoundException ex) {
+        return ResponseEntity.status(ex.getStatusCode()).body(ex.getReason());
     }
 
     @PostMapping("/create") 
     public ResponseEntity<Event> createEvent(@RequestBody Event event) {
-        return ResponseEntity.ok(eventRepository.save(event));    
+        return ResponseEntity.ok(eventService.saveEvent(event));    
     }
 
     @GetMapping("/all") 
     public ResponseEntity<List<Event>> getAllEvents() {
-        return ResponseEntity.ok(eventRepository.findByIsPublicTrueAndIsClosedFalse());
+        return ResponseEntity.ok(eventService.getAllEvents());
     }
 
     @PutMapping("/{id}")
@@ -48,7 +58,7 @@ public class EventController {
         return eventRepository.findById(id)
                 .map(e -> {
                     updatedEvent.setId(e.getId());
-                    return ResponseEntity.ok(eventRepository.save(updatedEvent));
+                    return ResponseEntity.ok(eventService.saveEvent(updatedEvent));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -56,7 +66,7 @@ public class EventController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteEvent(@PathVariable UUID id) {
         if(eventRepository.existsById(id)) {
-            eventRepository.deleteById(id);
+            eventService.deleteEvent(id);
             return ResponseEntity.ok("Event Deleted Successfully");
         }
         return ResponseEntity.notFound().build();
@@ -72,14 +82,17 @@ public class EventController {
         // event.closingNote = note
         return eventRepository.findById(id)
                 .map(e -> {
+                    if (e.getIsClosed()) {
+                        return ResponseEntity.badRequest().body("Event is already closed");
+                    }
                     e.setIsClosed(true);
                     e.setClosingNote(note);
-                    return ResponseEntity.ok(eventRepository.save(e));
+                    return ResponseEntity.ok(eventService.saveEvent(e));
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{eventId}/attendess")
+    @GetMapping("/{eventId}/attendees")
     public ResponseEntity<?> getAttendees(@PathVariable UUID eventId) {
         return eventRepository.findById(eventId)
                 .map(event -> ResponseEntity.ok(event.getAttendees()))
@@ -101,7 +114,7 @@ public class EventController {
                     }
 
                     e.getAttendees().add(userId);
-                    eventRepository.save(e);
+                    eventService.saveEvent(e);
                     return ResponseEntity.ok("RsVP Successfully");
                 })
                 .orElse(ResponseEntity.notFound().build());
@@ -111,14 +124,37 @@ public class EventController {
     public ResponseEntity<?> deleteRsvp(@PathVariable UUID eventId, @PathVariable UUID userId) {
         return eventRepository.findById(eventId)
                 .map(e ->{
+                    if(e.getIsClosed()) {
+                        return ResponseEntity.badRequest().body("Event is Closed");
+                    }
                     if(e.getAttendees().contains(userId)) {
                         e.getAttendees().remove(userId);
-                        eventRepository.save(e);
+                        eventService.saveEvent(e);
                         return ResponseEntity.ok("User removed RSVP");
                     } else {
                         return ResponseEntity.badRequest().body("User not RsVPed");
                     }
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<Map<String, String>> handleIllegalArgumentException(IllegalArgumentException ex) {
+        return ResponseEntity.status(400).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(DataAccessException.class)
+    public ResponseEntity<Map<String, String>> handleDataAccessException(DataAccessException ex) {
+        return ResponseEntity.status(500).body(Map.of("error", "Database error occurred"));
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<Map<String, String>> handleRuntimeException(RuntimeException ex) {
+        return ResponseEntity.status(500).body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(Exception ex) {
+        return ResponseEntity.status(500).body(Map.of("error", "An unexpected error occurred"));
     }
 }
