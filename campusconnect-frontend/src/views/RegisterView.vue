@@ -32,7 +32,7 @@ async function register() {
         console.log("Registered: ", data)
         router.push("/login")
     } catch (err) {
-        alert(err)
+        alert(err.message || err)
     }
 }
 
