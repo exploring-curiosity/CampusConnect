@@ -79,7 +79,7 @@ public class EventController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/{eventId}/attendess")
+    @GetMapping("/{eventId}/attendees")
     public ResponseEntity<?> getAttendees(@PathVariable UUID eventId) {
         return eventRepository.findById(eventId)
                 .map(event -> ResponseEntity.ok(event.getAttendees()))
